@@ -42,6 +42,14 @@ export async function main(ns: NS): Promise<void> {
   ns.disableLog("ALL");
   ns.print("Automation started");
 
+  if (
+    ns.fileExists("4s.js", "home") &&
+    !ns.isRunning("4s.js", "home") &&
+    ns.stock.has4SDataTIXAPI()
+  ) {
+    ns.run("4s.js", 1, "home");
+  }
+
   while (true) {
     const player = ns.getPlayer();
     const factionOffers = ns.singularity.checkFactionInvitations();
@@ -52,12 +60,16 @@ export async function main(ns: NS): Promise<void> {
         "Computer Sciences"
       );
       ns.printf("Taking computer classess");
-      while (ns.getHackingLevel() < 25) {
+      while (ns.getHackingLevel() < 50) {
         await ns.sleep(1000);
         ns.getHackingLevel();
       }
       ns.singularity.stopAction(); // Wait for the class to finish
     }
+
+    //Create Programs
+    await createProgram(ns, "BruteSSH.exe");
+    await createProgram(ns, "FTPCrack.exe");
 
     //Join relevant factions and work for them
     for (const faction of factionOffers) {
@@ -67,7 +79,6 @@ export async function main(ns: NS): Promise<void> {
       ) {
         ns.singularity.joinFaction(faction);
         ns.printf("Joined " + faction);
-        ns.toast("Joined " + faction);
       }
     }
 
@@ -77,12 +88,11 @@ export async function main(ns: NS): Promise<void> {
         if (canonFactions.includes(faction) && checkIfOwnedAugs(ns, faction)) {
           ns.singularity.workForFaction(faction, "hacking", false);
           ns.printf("Working for " + faction);
-          ns.toast("Working for " + faction);
         }
       }
     }
 
-    //Buy the Red Pill
+    //Buy the Red Pill---
     if (
       ns.singularity.getFactionRep("Daedalus") > 2.5e6 &&
       !ns.singularity.getOwnedAugmentations(true).includes("The Red Pill")
@@ -108,13 +118,13 @@ export async function main(ns: NS): Promise<void> {
       ns.printf("Purchased RELAY");
     }
     if (
-      ns.getHackingLevel() > 700 &&
-      player.money > ns.singularity.getDarkwebProgramCost("HTTPWorm.exe") &&
+      ns.getHackingLevel() > 550 &&
+      player.money > ns.singularity.getDarkwebProgramCost("relaySMTP.exe") &&
       ns.hasTorRouter() &&
       !ns.fileExists("HTTPWorm.exe", "home")
     ) {
       ns.singularity.purchaseProgram("HTTPWorm.exe");
-      ns.printf("Purchased Worm");
+      ns.printf("Purchased WORM");
     }
     if (
       ns.getHackingLevel() > 700 &&
@@ -131,20 +141,21 @@ export async function main(ns: NS): Promise<void> {
     ) {
       ns.singularity.commitCrime("Shoplift", false);
     } else if (!ns.singularity.isBusy()) {
-      ns.singularity.commitCrime("Larceny", false);
+      ns.singularity.commitCrime(    if (!ns.singularity.isBusy()) {"Larceny", false);
     } */
 
     for (let i = 0; i < canonServers.length; i++) {
       const server = ns.getServer(canonServers[i]);
       if (
         ns.hasRootAccess(canonServers[i]) &&
-        server.backdoorInstalled !== true
+        server.backdoorInstalled === false
       ) {
-        ns.run("findServer.js", 1, canonServers[i]);
         ns.printf("Installing backdoor on " + canonServers[i]);
+        ns.run("findServer.js", 1, canonServers[i]);
+        await ns.sleep(5000);
         await ns.singularity.installBackdoor();
+        await ns.sleep(5000);
         ns.printf("Backdoor on " + canonServers[i]);
-        ns.toast("Backdoor on " + canonServers[i]);
         ns.singularity.connect("home");
       }
     }
@@ -154,9 +165,6 @@ export async function main(ns: NS): Promise<void> {
       ns.stock.purchase4SMarketData();
       ns.stock.purchaseTixApi();
       ns.stock.purchase4SMarketDataTixApi();
-    }
-
-    if (ns.stock.has4SDataTIXAPI() && !ns.isRunning("4s.js", "home")) {
       ns.exec("4s.js", "home");
     }
 
@@ -167,15 +175,20 @@ export async function main(ns: NS): Promise<void> {
   function checkIfOwnedAugs(ns: NS, faction: string): boolean {
     const ownedAugs = ns.singularity.getOwnedAugmentations(true);
     const factionAugs = ns.singularity.getAugmentationsFromFaction(faction);
-    ns.print(factionAugs);
-    ns.print(ownedAugs);
     let checked = 0;
     for (const aug of factionAugs) {
       if (ownedAugs.includes(aug)) {
         checked = checked + 1;
       }
     }
-    ns.print(checked);
+    ns.print(
+      "Owns " +
+        checked +
+        " out of " +
+        factionAugs.length +
+        " augs from " +
+        faction
+    );
     if (factionAugs.length === checked) {
       return false;
     } else {
@@ -192,5 +205,9 @@ export async function main(ns: NS): Promise<void> {
       ns.print("Created " + exe);
       ns.toast("Created " + exe);
     }
+    await ns.sleep(0);
   }
 }
+
+//rate augmentations
+/* for (const [ , ] of ) */
