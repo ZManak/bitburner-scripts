@@ -24,4 +24,13 @@ function overKill(ns: NS, servers: string[]): void {
   }
 }
 
-export { scanServers, overKill, autocomplete };
+function upgradeRam(ns: NS): void {
+  try {
+    ns.singularity.upgradeHomeRam();
+    ns.tprint("Upgraded RAM");
+  } catch (e) {
+    ns.tprint(e);
+  }
+}
+
+export { scanServers, overKill, autocomplete, upgradeRam };

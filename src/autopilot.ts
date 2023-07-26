@@ -5,7 +5,7 @@ export async function main(ns: NS): Promise<void> {
   const exes = [
     "BruteSSH.exe",
     "FTPCrack.exe",
-    "RelaySMTP.exe",
+    "relaySMTP.exe",
     "HTTPWorm.exe",
     "SQLInject.exe",
     "AutoLink.exe",
@@ -71,7 +71,7 @@ export async function main(ns: NS): Promise<void> {
     await createProgram(ns, "BruteSSH.exe");
     await createProgram(ns, "FTPCrack.exe");
 
-    //Join relevant factions and work for them
+    //Join relevant factions
     for (const faction of factionOffers) {
       if (
         canonFactions.includes(faction) &&
@@ -92,7 +92,7 @@ export async function main(ns: NS): Promise<void> {
       }
     }
 
-    //Buy the Red Pill---
+    //Buy && Install the Red Pill---
     if (
       ns.singularity.getFactionRep("Daedalus") > 2.5e6 &&
       !ns.singularity.getOwnedAugmentations(true).includes("The Red Pill")
@@ -101,8 +101,9 @@ export async function main(ns: NS): Promise<void> {
       ns.exec("/singularity/installAugs.js", "home");
     }
 
-    //Sync works
+    //buy servers when possible
 
+    //Buy programs
     if (player.money > 300000 && !ns.hasTorRouter()) {
       ns.singularity.purchaseTor();
       ns.printf("Purchased TOR");
@@ -110,40 +111,44 @@ export async function main(ns: NS): Promise<void> {
     }
     if (
       ns.getHackingLevel() > 390 &&
-      player.money > ns.singularity.getDarkwebProgramCost("relaySMTP.exe") &&
+      player.money > ns.singularity.getDarkwebProgramCost(exes[3]) &&
       ns.hasTorRouter() &&
-      !ns.fileExists("relaySMTP.exe", "home")
+      !ns.fileExists(exes[3], "home")
     ) {
-      ns.singularity.purchaseProgram("relaySMTP.exe");
+      ns.singularity.purchaseProgram(exes[3]);
       ns.printf("Purchased RELAY");
     }
     if (
       ns.getHackingLevel() > 550 &&
-      player.money > ns.singularity.getDarkwebProgramCost("relaySMTP.exe") &&
+      player.money > ns.singularity.getDarkwebProgramCost(exes[4]) &&
       ns.hasTorRouter() &&
-      !ns.fileExists("HTTPWorm.exe", "home")
+      !ns.fileExists(exes[4], "home")
     ) {
-      ns.singularity.purchaseProgram("HTTPWorm.exe");
+      ns.singularity.purchaseProgram(exes[4]);
       ns.printf("Purchased WORM");
     }
     if (
       ns.getHackingLevel() > 700 &&
-      player.money > ns.singularity.getDarkwebProgramCost("SQLInject.exe") &&
+      player.money > ns.singularity.getDarkwebProgramCost(exes[5]) &&
       ns.hasTorRouter() &&
-      !ns.fileExists("SQLInject.exe", "home")
+      !ns.fileExists(exes[5], "home")
     ) {
-      ns.singularity.purchaseProgram("SQLInject.exe");
+      ns.singularity.purchaseProgram(exes[5]);
       ns.printf("Purchased SQLInject");
     }
+
+    //Buy servers
+
     /* if (
       ns.formulas.work.crimeSuccessChance(player, "Larceny") < 0.75 &&
       !ns.singularity.isBusy()
     ) {
       ns.singularity.commitCrime("Shoplift", false);
     } else if (!ns.singularity.isBusy()) {
-      ns.singularity.commitCrime(    if (!ns.singularity.isBusy()) {"Larceny", false);
+      ns.singularity.commitCrime("Larceny", false);
     } */
 
+    //Install backdoors on canon servers
     for (let i = 0; i < canonServers.length; i++) {
       const server = ns.getServer(canonServers[i]);
       if (
@@ -160,6 +165,7 @@ export async function main(ns: NS): Promise<void> {
       }
     }
 
+    //Get into Stock Market
     if (!ns.stock.has4SDataTIXAPI() && player.money > 35e9) {
       ns.stock.purchaseWseAccount();
       ns.stock.purchase4SMarketData();

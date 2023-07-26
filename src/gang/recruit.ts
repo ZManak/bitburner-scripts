@@ -4,6 +4,8 @@ export async function main(ns: NS): Promise<void> {
   // eslint-disable-next-line no-constant-condition
   while (true) {
     ns.clearLog();
+    const crew = ns.gang.getMemberNames();
+    const gangInfo = ns.gang.getGangInformation();
     let i = 0;
     let canRecruit = true;
     while (canRecruit) {
@@ -16,8 +18,6 @@ export async function main(ns: NS): Promise<void> {
       await ns.sleep(10000);
     }
 
-    const crew = ns.gang.getMemberNames();
-    const gangInfo = ns.gang.getGangInformation();
     ns.printf("Gang size: " + crew.length);
     ns.printf("Gang power: " + gangInfo.power);
 
@@ -34,6 +34,14 @@ export async function main(ns: NS): Promise<void> {
         ns.gang.setMemberTask(member, "Terrorism");
       }
     }
+
+    //Set members to Human Traficking if members doing Terrorism is greater than 3
+    const terrorist = crew.filter(
+      (member) => ns.gang.getMemberInformation(member).task === "Terrorism"
+    );
+    terrorist.length > 3
+      ? ns.gang.setMemberTask(terrorist[0], "Human Traficking")
+      : null;
 
     //const allEquipment = ns.gang.getEquipmentNames();
 
