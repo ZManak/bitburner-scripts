@@ -33,4 +33,14 @@ function upgradeRam(ns: NS): void {
   }
 }
 
-export { scanServers, overKill, autocomplete, upgradeRam };
+function upgradeCores(ns: NS): void {
+  try {
+    ns.singularity.upgradeHomeCores();
+    ns.tprint("Upgraded Cores --> " + ns.getServer().cpuCores);
+    ns.tprint("Next Upgrade --> " + ns.singularity.getUpgradeHomeCoresCost());
+  } catch (e) {
+    ns.tprint(e);
+  }
+}
+
+export { scanServers, overKill, autocomplete, upgradeRam, upgradeCores };

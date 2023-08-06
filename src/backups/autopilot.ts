@@ -1,5 +1,3 @@
-//ALL
-//aaaaaaaaaaaaaaa
 /* eslint-disable no-constant-condition */
 import { NS } from "@ns";
 
@@ -41,14 +39,16 @@ export async function main(ns: NS): Promise<void> {
     "Silhouette",
   ];
 
-  //let serversRam = 64;
-
   ns.disableLog("ALL");
   ns.print("Automation started");
 
-  /*if (ns.fileExists("4s.js", "home") && !ns.isRunning("4s.js", "home")) {
+  if (
+    ns.fileExists("4s.js", "home") &&
+    !ns.isRunning("4s.js", "home") &&
+    ns.stock.has4SDataTIXAPI()
+  ) {
     ns.run("4s.js", 1, "home");
-  }*/
+  }
 
   while (true) {
     const player = ns.getPlayer();
@@ -71,20 +71,37 @@ export async function main(ns: NS): Promise<void> {
     await createProgram(ns, "BruteSSH.exe");
     await createProgram(ns, "FTPCrack.exe");
 
-    //Buy nickofolas Congruity Implant
-    if (
-      !ns.singularity.isBusy() &&
-      !ns.singularity
-        .getOwnedAugmentations()
-        .includes("nickofolas Congruity Implant") &&
-      ns.grafting
-        .getGraftableAugmentations()
-        .includes("nickofolas Congruity Implant") &&
-      ns.getServerMoneyAvailable("home") > 150e12
-    ) {
-      ns.singularity.travelToCity("New Tokyo");
-      ns.grafting.graftAugmentation("nickofolas Congruity Implant");
+    //Join relevant factions
+    for (const faction of factionOffers) {
+      if (
+        canonFactions.includes(faction) &&
+        !player.factions.includes(faction)
+      ) {
+        ns.singularity.joinFaction(faction);
+        ns.printf("Joined " + faction);
+      }
     }
+
+    //Work for factions
+    if (!ns.singularity.isBusy()) {
+      for (const faction of player.factions) {
+        if (canonFactions.includes(faction) && checkIfOwnedAugs(ns, faction)) {
+          ns.singularity.workForFaction(faction, "hacking", false);
+          ns.printf("Working for " + faction);
+        }
+      }
+    }
+
+    //Buy && Install the Red Pill---
+    if (
+      ns.singularity.getFactionRep("Daedalus") > 2.5e6 &&
+      !ns.singularity.getOwnedAugmentations(true).includes("The Red Pill")
+    ) {
+      ns.singularity.purchaseAugmentation("Daedalus", "The Red Pill");
+      ns.exec("/singularity/installAugs.js", "home");
+    }
+
+    //buy servers when possible
 
     //Buy programs
     if (player.money > 300000 && !ns.hasTorRouter()) {
@@ -94,8 +111,7 @@ export async function main(ns: NS): Promise<void> {
     }
     if (
       ns.getHackingLevel() > 390 &&
-      ns.getServerMoneyAvailable("home") >
-        ns.singularity.getDarkwebProgramCost(exes[3]) &&
+      player.money > ns.singularity.getDarkwebProgramCost(exes[3]) &&
       ns.hasTorRouter() &&
       !ns.fileExists(exes[3], "home")
     ) {
@@ -121,54 +137,7 @@ export async function main(ns: NS): Promise<void> {
       ns.printf("Purchased SQLInject");
     }
 
-    //Join relevant factions
-    for (const faction of factionOffers) {
-      if (
-        canonFactions.includes(faction) &&
-        !player.factions.includes(faction)
-      ) {
-        ns.singularity.joinFaction(faction);
-        ns.printf("Joined " + faction);
-      }
-    }
-
-    /*  //Work for factions
-    if (!ns.singularity.isBusy()) {
-      for (const faction of player.factions) {
-        if (canonFactions.includes(faction) && checkIfOwnedAugs(ns, faction)) {
-          ns.singularity.workForFaction(faction, "hacking", false);
-          ns.printf("Working for " + faction);
-        }
-      }
-    } */
-
-    //Buy && Install the Red Pill---
-    if (
-      ns.singularity.getFactionRep("Daedalus") > 2.5e6 &&
-      !ns.singularity.getOwnedAugmentations(true).includes("The Red Pill")
-    ) {
-      ns.singularity.purchaseAugmentation("Daedalus", "The Red Pill");
-      //ns.exec("/singularity/installAugs.js", "home");
-    }
-
-    //buy servers when possible
-    /*  if (ns.getPurchasedServers().length < ns.getPurchasedServerLimit()) {
-      await buyServers(ns, serversRam);
-      serversRam = serversRam * 2;
-    } */
-
-    //Upgrade servers
-    /* if (
-      ns.getPurchasedServers().length > 0 &&
-      ns.getPurchasedServerUpgradeCost(
-        ns.getPurchasedServers()[0],
-        serversRam
-      ) <
-        ns.getServerMoneyAvailable("home") * 0.7
-    ) {
-      upgradeServers(ns, serversRam);
-      //serversRam = serversRam * 2;
-    } */
+    //Buy servers
 
     /* if (
       ns.formulas.work.crimeSuccessChance(player, "Larceny") < 0.75 &&
@@ -196,30 +165,13 @@ export async function main(ns: NS): Promise<void> {
       }
     }
 
-    //Backdoor useful servers
-    for (let i = 0; i < usefulServers.length; i++) {
-      const server = ns.getServer(usefulServers[i]);
-      if (
-        ns.hasRootAccess(usefulServers[i]) &&
-        server.backdoorInstalled === false
-      ) {
-        ns.printf("Installing backdoor on " + usefulServers[i]);
-        ns.run("findServer.js", 1, usefulServers[i]);
-        await ns.sleep(5000);
-        await ns.singularity.installBackdoor();
-        await ns.sleep(5000);
-        ns.printf("Backdoor on " + usefulServers[i]);
-        ns.singularity.connect("home");
-      }
-    }
-
     //Get into Stock Market
     if (!ns.stock.has4SDataTIXAPI() && player.money > 35e9) {
       ns.stock.purchaseWseAccount();
       ns.stock.purchase4SMarketData();
       ns.stock.purchaseTixApi();
       ns.stock.purchase4SMarketDataTixApi();
-      //ns.exec("4s.js", "home");
+      ns.exec("4s.js", "home");
     }
 
     await ns.sleep(0);
@@ -262,37 +214,17 @@ export async function main(ns: NS): Promise<void> {
     await ns.sleep(0);
   }
 
-  async function buyServers(ns: NS, ram: number): Promise<void> {
-    const servers = ns.getPurchasedServers();
-    const serverCost = ns.getPurchasedServerCost(ram);
-    const maxServers = ns.getPurchasedServerLimit();
-    const money = ns.getServerMoneyAvailable("home");
-    for (let i = 0; i < maxServers; i++) {
-      if (money > serverCost && servers.length < maxServers) {
-        try {
-          const server = ns.purchaseServer("Servo-", ram);
-          ns.print("Purchased server " + server + " with " + ram + "GB of RAM");
-        } catch (e) {
-          ns.print("Failed to purchase server");
-        }
-      }
-    }
-  }
-
-  function upgradeServers(ns: NS, ram: number): void {
-    const servers = ns.getPurchasedServers();
-    const maxRam = ns.getPurchasedServerMaxRam();
-    const cost = ns.getPurchasedServerUpgradeCost(servers[0], ram);
-    const money = ns.getServerMoneyAvailable("home");
-    if (ram < maxRam && money * 0.7 > cost) {
-      for (const server of servers) {
-        const success = ns.upgradePurchasedServer(server, ram);
-        if (success) {
-          ns.print("Upgraded server " + server + " to " + ram + "GB of RAM");
-        }
-      }
+  function buyServers(ns: NS, ram: number): void {
+    for (
+      let i: number = ns.getPurchasedServers().length;
+      i < ns.getPurchasedServerLimit();
+      i++
+    ) {
+      const serverName = ns.purchaseServer("server-", ram);
+      ns.print("Purchased " + serverName + " with " + ram + "GB of RAM");
     }
   }
 }
+
 //rate augmentations
 /* for (const [ , ] of ) */
