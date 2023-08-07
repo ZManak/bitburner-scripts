@@ -4,18 +4,23 @@ export async function main(ns: NS): Promise<void> {
   // eslint-disable-next-line no-constant-condition
   while (true) {
     ns.clearLog();
+    if (!ns.gang.inGang()) {
+      try {
+        ns.gang.createGang("Slum Snakes");
+        ns.print("Gang created");
+      } catch (e) {
+        ns.tprint("Gang already exists");
+      }
+    }
     const crew = ns.gang.getMemberNames();
     const gangInfo = ns.gang.getGangInformation();
     let i = 0;
-    let canRecruit = true;
-    while (canRecruit) {
-      ns.gang.recruitMember("Unit-0" + i);
-      if (ns.gang.getMemberInformation("Unit-0" + i).task === "Idle") {
-        ns.gang.setMemberTask("Unit-0" + i, "Train Combat");
-      }
+    const canRecruit = ns.gang.canRecruitMember();
+    //Recruit members until gang is full
+    if (canRecruit) {
+      ns.gang.recruitMember("Unit-00" + i);
+      ns.gang.setMemberTask("Unit-00" + i, "Train Combat");
       i++;
-      canRecruit = ns.gang.canRecruitMember();
-      await ns.sleep(10000);
     }
 
     ns.printf("Gang size: " + crew.length);
@@ -33,18 +38,43 @@ export async function main(ns: NS): Promise<void> {
       if (memberInfo.agi > 600 && memberInfo.task === "Train Combat") {
         ns.gang.setMemberTask(member, "Terrorism");
       }
+      //Augmentate trained members
+      installAugs(member, ns.getServerMoneyAvailable("home"));
     }
 
     //Set members to Human Traficking if members doing Terrorism is greater than 3
     const terrorist = crew.filter(
       (member) => ns.gang.getMemberInformation(member).task === "Terrorism"
     );
+    ns.print(terrorist[0] + terrorist[1]);
     terrorist.length > 3
-      ? ns.gang.setMemberTask(terrorist[0], "Human Traficking")
+      ? ns.gang.setMemberTask(terrorist[0], "Human Trafficking")
       : null;
 
-    //const allEquipment = ns.gang.getEquipmentNames();
-
     await ns.sleep(1000);
+  }
+
+  function installAugs(member: string, funds: number) {
+    const equipment = ns.gang.getEquipmentNames();
+    const augs = equipment.filter(
+      (item) => ns.gang.getEquipmentType(item) === "Augmentation"
+    );
+    const combatAugs = augs.filter(
+      (item) =>
+        ns.gang.getEquipmentStats(item).str ||
+        ns.gang.getEquipmentStats(item).def ||
+        ns.gang.getEquipmentStats(item).dex ||
+        ns.gang.getEquipmentStats(item).agi
+    );
+    for (const aug of combatAugs) {
+      if (
+        funds > ns.gang.getEquipmentCost(aug) &&
+        !ns.gang.getMemberInformation(member).augmentations.includes(aug)
+      ) {
+        ns.gang.purchaseEquipment(member, aug)
+          ? ns.print(`Succesfully installed ${aug} in ${member}`)
+          : null;
+      }
+    }
   }
 }

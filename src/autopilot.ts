@@ -1,7 +1,10 @@
-//ALL
-//aaaaaaaaaaaaaaa
+//4s.js will get interrupted by the sell script, and the sell script will get interrupted by 4s.js.
+//This is because the sell script is running in the background, and 4s.js is running in the foreground.
+//The solution is to run 4s.js in the background, and the sell script in the foreground.
+
 /* eslint-disable no-constant-condition */
 import { NS } from "@ns";
+import { value } from "stocks/portfolioValue";
 
 export async function main(ns: NS): Promise<void> {
   const exes = [
@@ -14,7 +17,7 @@ export async function main(ns: NS): Promise<void> {
     "ServerProfiler.exe",
   ];
   const canonServers = ["CSEC", "avmnite-02h", "I.I.I.I", "run4theh111z"];
-  const usefulServers = [
+  const serverList = [
     "iron-gym",
     "powerhouse-fitness",
     "snap-fitness",
@@ -41,16 +44,17 @@ export async function main(ns: NS): Promise<void> {
     "Silhouette",
   ];
 
-  //let serversRam = 64;
-
+  let serversRam = 64;
+  ns.setTitle("Singularity Automation");
   ns.disableLog("ALL");
   ns.print("Automation started");
 
-  /*if (ns.fileExists("4s.js", "home") && !ns.isRunning("4s.js", "home")) {
+  /* if (ns.fileExists("4s.js", "home") && !ns.isRunning("4s.js", "home")) {
     ns.run("4s.js", 1, "home");
-  }*/
+  } */
 
   while (true) {
+    const netWorh = ns.getServerMoneyAvailable("home") + value(ns);
     const player = ns.getPlayer();
     const factionOffers = ns.singularity.checkFactionInvitations();
 
@@ -132,15 +136,15 @@ export async function main(ns: NS): Promise<void> {
       }
     }
 
-    /*  //Work for factions
-    if (!ns.singularity.isBusy()) {
+    //Work for factions
+    if (!ns.singularity.isBusy() && !ns.gang.inGang()) {
       for (const faction of player.factions) {
         if (canonFactions.includes(faction) && checkIfOwnedAugs(ns, faction)) {
           ns.singularity.workForFaction(faction, "hacking", false);
           ns.printf("Working for " + faction);
         }
       }
-    } */
+    }
 
     //Buy && Install the Red Pill---
     if (
@@ -151,26 +155,25 @@ export async function main(ns: NS): Promise<void> {
       //ns.exec("/singularity/installAugs.js", "home");
     }
 
-    //buy servers when possible
-    /*  if (ns.getPurchasedServers().length < ns.getPurchasedServerLimit()) {
-      await buyServers(ns, serversRam);
+    //Buy servers when possible
+    if (ns.getPurchasedServers().length < ns.getPurchasedServerLimit()) {
+      buyServers(ns, serversRam);
       serversRam = serversRam * 2;
-    } */
+    }
 
-    //Upgrade servers
-    /* if (
+    //Upgrade servers & increase next upgrade ram
+    if (
       ns.getPurchasedServers().length > 0 &&
       ns.getPurchasedServerUpgradeCost(
         ns.getPurchasedServers()[0],
         serversRam
       ) <
-        ns.getServerMoneyAvailable("home") * 0.7
+        ns.getServerMoneyAvailable("home") * 1.4
     ) {
-      upgradeServers(ns, serversRam);
-      //serversRam = serversRam * 2;
-    } */
+      upgradeServers(ns, serversRam) ? (serversRam = serversRam * 2) : null;
+    }
 
-    /* if (
+    /*if (
       ns.formulas.work.crimeSuccessChance(player, "Larceny") < 0.75 &&
       !ns.singularity.isBusy()
     ) {
@@ -180,7 +183,8 @@ export async function main(ns: NS): Promise<void> {
     } */
 
     //Install backdoors on canon servers
-    for (let i = 0; i < canonServers.length; i++) {
+    await installBackdoor(canonServers);
+    /* for (let i = 0; i < canonServers.length; i++) {
       const server = ns.getServer(canonServers[i]);
       if (
         ns.hasRootAccess(canonServers[i]) &&
@@ -194,24 +198,25 @@ export async function main(ns: NS): Promise<void> {
         ns.printf("Backdoor on " + canonServers[i]);
         ns.singularity.connect("home");
       }
-    }
+    } */
 
     //Backdoor useful servers
-    for (let i = 0; i < usefulServers.length; i++) {
-      const server = ns.getServer(usefulServers[i]);
+    await installBackdoor(serverList);
+    /* for (let i = 0; i < serverList.length; i++) {
+      const server = ns.getServer(serverList[i]);
       if (
-        ns.hasRootAccess(usefulServers[i]) &&
+        ns.hasRootAccess(serverList[i]) &&
         server.backdoorInstalled === false
       ) {
-        ns.printf("Installing backdoor on " + usefulServers[i]);
-        ns.run("findServer.js", 1, usefulServers[i]);
+        ns.printf("Installing backdoor on " + serverList[i]);
+        ns.run("findServer.js", 1, serverList[i]);
         await ns.sleep(5000);
         await ns.singularity.installBackdoor();
         await ns.sleep(5000);
-        ns.printf("Backdoor on " + usefulServers[i]);
+        ns.printf("Backdoor on " + serverList[i]);
         ns.singularity.connect("home");
       }
-    }
+    } */
 
     //Get into Stock Market
     if (!ns.stock.has4SDataTIXAPI() && player.money > 35e9) {
@@ -219,9 +224,10 @@ export async function main(ns: NS): Promise<void> {
       ns.stock.purchase4SMarketData();
       ns.stock.purchaseTixApi();
       ns.stock.purchase4SMarketDataTixApi();
+      ns.print("Purchased 4S Data and TIX API");
       //ns.exec("4s.js", "home");
     }
-
+    ns.print("End of loop");
     await ns.sleep(0);
   }
 
@@ -262,7 +268,7 @@ export async function main(ns: NS): Promise<void> {
     await ns.sleep(0);
   }
 
-  async function buyServers(ns: NS, ram: number): Promise<void> {
+  function buyServers(ns: NS, ram: number): void {
     const servers = ns.getPurchasedServers();
     const serverCost = ns.getPurchasedServerCost(ram);
     const maxServers = ns.getPurchasedServerLimit();
@@ -279,17 +285,43 @@ export async function main(ns: NS): Promise<void> {
     }
   }
 
-  function upgradeServers(ns: NS, ram: number): void {
+  function upgradeServers(ns: NS, ram: number): boolean {
     const servers = ns.getPurchasedServers();
     const maxRam = ns.getPurchasedServerMaxRam();
     const cost = ns.getPurchasedServerUpgradeCost(servers[0], ram);
     const money = ns.getServerMoneyAvailable("home");
-    if (ram < maxRam && money * 0.7 > cost) {
+    let upgraded = 0;
+    if (ram < maxRam && money * 1.3 > cost) {
       for (const server of servers) {
         const success = ns.upgradePurchasedServer(server, ram);
         if (success) {
           ns.print("Upgraded server " + server + " to " + ram + "GB of RAM");
+          upgraded = upgraded + 1;
         }
+      }
+    }
+    if (upgraded === servers.length) {
+      ns.print("Upgraded all servers to " + ram + "GB of RAM");
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  async function installBackdoor(serverList: string[]): Promise<void> {
+    for (let i = 0; i < serverList.length; i++) {
+      const server = ns.getServer(serverList[i]);
+      if (
+        ns.hasRootAccess(serverList[i]) &&
+        server.backdoorInstalled === false
+      ) {
+        ns.printf("Installing backdoor on " + serverList[i]);
+        ns.run("findServer.js", 1, serverList[i]);
+        await ns.sleep(5000);
+        await ns.singularity.installBackdoor();
+        await ns.sleep(5000);
+        ns.printf("Backdoor on " + serverList[i]);
+        ns.singularity.connect("home");
       }
     }
   }
