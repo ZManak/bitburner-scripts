@@ -1,6 +1,6 @@
 import { NS } from "@ns";
 import { colors } from "utils/palette.js";
-
+///
 //Sleeves number is hardcoded
 //Track the status of each sleeve
 //Shows INT
@@ -31,7 +31,16 @@ export async function main(ns: NS): Promise<void> {
         clone.skills.hacking,
         clone.skills.charisma
       );
-      ns.printf(colors.cyan + "Int: %d", clone.skills.intelligence);
+      ns.printf(
+        colors.cyan + "Int: %d / %d exp remaining (%s)",
+        clone.skills.intelligence,
+        ns.formulas.skills.calculateExp(clone.skills.intelligence + 1) -
+          clone.exp.intelligence,
+        ns.formatPercent(
+          clone.exp.intelligence /
+            ns.formulas.skills.calculateExp(clone.skills.intelligence + 1)
+        )
+      );
       ns.printf("Cycles: %d", clone.storedCycles);
       if (cloneTask?.type === "CRIME") {
         ns.printf(

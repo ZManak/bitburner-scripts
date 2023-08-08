@@ -54,6 +54,7 @@ export async function main(ns: NS): Promise<void> {
   } */
 
   while (true) {
+    //ns.clearLog();
     const netWorh = ns.getServerMoneyAvailable("home") + value(ns);
     const player = ns.getPlayer();
     const factionOffers = ns.singularity.checkFactionInvitations();
@@ -97,13 +98,12 @@ export async function main(ns: NS): Promise<void> {
       ns.toast("Purchased TOR");
     }
     if (
-      ns.getHackingLevel() > 390 &&
-      ns.getServerMoneyAvailable("home") >
-        ns.singularity.getDarkwebProgramCost(exes[3]) &&
+      ns.getHackingLevel() > 550 &&
+      player.money > ns.singularity.getDarkwebProgramCost(exes[2]) &&
       ns.hasTorRouter() &&
-      !ns.fileExists(exes[3], "home")
+      !ns.fileExists(exes[2], "home")
     ) {
-      ns.singularity.purchaseProgram(exes[3]);
+      ns.singularity.purchaseProgram(exes[2]);
       ns.printf("Purchased RELAY");
     }
     if (
@@ -166,11 +166,11 @@ export async function main(ns: NS): Promise<void> {
       ns.getPurchasedServers().length > 0 &&
       ns.getPurchasedServerUpgradeCost(
         ns.getPurchasedServers()[0],
-        serversRam
+        ns.getServer(ns.getPurchasedServers()[14]).maxRam
       ) <
         ns.getServerMoneyAvailable("home") * 1.4
     ) {
-      upgradeServers(ns, serversRam) ? (serversRam = serversRam * 2) : null;
+      upgradeServers(ns, ns.getServer(ns.getPurchasedServers()[14]).maxRam * 2);
     }
 
     /*if (
@@ -227,7 +227,6 @@ export async function main(ns: NS): Promise<void> {
       ns.print("Purchased 4S Data and TIX API");
       //ns.exec("4s.js", "home");
     }
-    ns.print("End of loop");
     await ns.sleep(0);
   }
 
@@ -263,9 +262,10 @@ export async function main(ns: NS): Promise<void> {
         await ns.sleep(1000);
       }
       ns.print("Created " + exe);
-      ns.toast("Created " + exe);
+      ns.toast("Created " + exe, "info");
     }
-    await ns.sleep(0);
+    ns.toast("Singularity Loop STATUS: ON", "success", 1000);
+    await ns.sleep(1500);
   }
 
   function buyServers(ns: NS, ram: number): void {
@@ -295,10 +295,11 @@ export async function main(ns: NS): Promise<void> {
       for (const server of servers) {
         const success = ns.upgradePurchasedServer(server, ram);
         if (success) {
-          ns.print("Upgraded server " + server + " to " + ram + "GB of RAM");
+          ns.print("Upgraded server " + server + " to " + ram + " of RAM");
           upgraded = upgraded + 1;
         }
       }
+      ns.printf(servers.length - upgraded + " servers remain");
     }
     if (upgraded === servers.length) {
       ns.print("Upgraded all servers to " + ram + "GB of RAM");
@@ -317,9 +318,9 @@ export async function main(ns: NS): Promise<void> {
       ) {
         ns.printf("Installing backdoor on " + serverList[i]);
         ns.run("findServer.js", 1, serverList[i]);
-        await ns.sleep(5000);
+        await ns.sleep(1500);
         await ns.singularity.installBackdoor();
-        await ns.sleep(5000);
+        await ns.sleep(1500);
         ns.printf("Backdoor on " + serverList[i]);
         ns.singularity.connect("home");
       }
