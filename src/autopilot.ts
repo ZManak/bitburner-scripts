@@ -108,20 +108,20 @@ export async function main(ns: NS): Promise<void> {
     }
     if (
       ns.getHackingLevel() > 550 &&
+      player.money > ns.singularity.getDarkwebProgramCost(exes[3]) &&
+      ns.hasTorRouter() &&
+      !ns.fileExists(exes[3], "home")
+    ) {
+      ns.singularity.purchaseProgram(exes[3]);
+      ns.printf("Purchased WORM");
+    }
+    if (
+      ns.getHackingLevel() > 700 &&
       player.money > ns.singularity.getDarkwebProgramCost(exes[4]) &&
       ns.hasTorRouter() &&
       !ns.fileExists(exes[4], "home")
     ) {
       ns.singularity.purchaseProgram(exes[4]);
-      ns.printf("Purchased WORM");
-    }
-    if (
-      ns.getHackingLevel() > 700 &&
-      player.money > ns.singularity.getDarkwebProgramCost(exes[5]) &&
-      ns.hasTorRouter() &&
-      !ns.fileExists(exes[5], "home")
-    ) {
-      ns.singularity.purchaseProgram(exes[5]);
       ns.printf("Purchased SQLInject");
     }
 
@@ -137,7 +137,9 @@ export async function main(ns: NS): Promise<void> {
     }
 
     //Work for factions
-    if (!ns.singularity.isBusy() && !ns.gang.inGang()) {
+    if (!ns.singularity.isBusy() && player.factions.includes("Daedalus")) {
+      ns.singularity.workForFaction("Daedalus", "hacking", false);
+    } else if (!ns.singularity.isBusy()) {
       for (const faction of player.factions) {
         if (canonFactions.includes(faction) && checkIfOwnedAugs(ns, faction)) {
           ns.singularity.workForFaction(faction, "hacking", false);
@@ -227,7 +229,8 @@ export async function main(ns: NS): Promise<void> {
       ns.print("Purchased 4S Data and TIX API");
       //ns.exec("4s.js", "home");
     }
-    await ns.sleep(0);
+    ns.toast("Singularity Loop STATUS: ON", "success", 1000);
+    await ns.sleep(1500);
   }
 
   //Checks if owned all augs from faction
@@ -264,8 +267,8 @@ export async function main(ns: NS): Promise<void> {
       ns.print("Created " + exe);
       ns.toast("Created " + exe, "info");
     }
-    ns.toast("Singularity Loop STATUS: ON", "success", 1000);
-    await ns.sleep(1500);
+
+    await ns.sleep(0);
   }
 
   function buyServers(ns: NS, ram: number): void {
@@ -299,7 +302,6 @@ export async function main(ns: NS): Promise<void> {
           upgraded = upgraded + 1;
         }
       }
-      ns.printf(servers.length - upgraded + " servers remain");
     }
     if (upgraded === servers.length) {
       ns.print("Upgraded all servers to " + ram + "GB of RAM");
@@ -318,7 +320,7 @@ export async function main(ns: NS): Promise<void> {
       ) {
         ns.printf("Installing backdoor on " + serverList[i]);
         ns.run("findServer.js", 1, serverList[i]);
-        await ns.sleep(1500);
+        await ns.sleep(2500);
         await ns.singularity.installBackdoor();
         await ns.sleep(1500);
         ns.printf("Backdoor on " + serverList[i]);
@@ -327,5 +329,6 @@ export async function main(ns: NS): Promise<void> {
     }
   }
 }
+
 //rate augmentations
 /* for (const [ , ] of ) */
