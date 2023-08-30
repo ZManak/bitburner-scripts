@@ -1,6 +1,6 @@
 import { NS } from "@ns";
 
-export async function main(ns: NS): Promise<void> {
+export function main(ns: NS): void {
   const doing = ns.bladeburner.getCurrentAction();
   ns.tprint(doing.name);
 }

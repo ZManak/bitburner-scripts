@@ -6,7 +6,7 @@ import { NS } from "@ns";
 export async function main(ns: NS): Promise<void> {
   ns.tail();
 
-  //Help text =)
+  //Help text
   const args = ns.flags([["help", false]]);
   const faction = <string>ns.args[0];
   const favor = <number>ns.args[1];
@@ -51,15 +51,6 @@ export async function main(ns: NS): Promise<void> {
     const timeRemaining = cyclesRemaining * cycleTime;
     ns.print(`${formatHhMmSs(timeRemaining)} until Favor to Donate`);
     ns.print(ns.formatPercent(remainingRep / repRequired) + " left");
-    /* } else {
-      const timeRemaining = (remainingRep / repPerCycle).toPrecision(20);
-      ns.print(
-        `${new Date(
-          convertToMs((parseFloat(timeRemaining) / 3600) * 0.2)
-        ).toLocaleTimeString()} hours until Favor to Donate`
-      );
-      ns.print(ns.formatPercent(remainingRep / repRequired) + " left");
-    } */
 
     await ns.sleep(1000);
   }

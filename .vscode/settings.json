@@ -1,4 +1,18 @@
 {
   "editor.tabCompletion": "on",
-  "diffEditor.codeLens": true
+  "diffEditor.codeLens": true,
+  "workbench.tree.renderIndentGuides": "always",
+  "workbench.view.alwaysShowHeaderActions": true,
+  "workbench.iconTheme": "vs-seti",
+  "workbench.preferredLightColorTheme": "Futuristt",
+  "workbench.colorCustomizations": {
+    "editor.background": "#1e1e1e",
+    "editor.foreground": "#d4d4d4",
+    "editor.lineHighlightBackground": "#343232",
+    "editor.selectionBackground": "#353535",
+    "editorCursor.foreground": "#d4d4d4",
+    "editorWhitespace.foreground": "#404040",
+    "focusBorder": "#d2cb42",
+    "contrastBorder": "#8d913b"
+  }
 }

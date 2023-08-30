@@ -1,5 +1,5 @@
 import { NS } from "@ns";
-
+//v1
 function autocomplete(data: any, args: string): Array<string> {
   return data.servers;
 }
@@ -26,8 +26,15 @@ function overKill(ns: NS, servers: string[]): void {
 
 function upgradeRam(ns: NS): void {
   try {
+    ns.tprint(
+      "Spendind " + ns.formatNumber(ns.singularity.getUpgradeHomeRamCost())
+    );
     ns.singularity.upgradeHomeRam();
-    ns.tprint("Upgraded RAM");
+    ns.tprint("Upgraded RAM to " + ns.getServer().maxRam);
+    ns.tprint(
+      "Next upgrade will be " +
+        ns.formatNumber(ns.singularity.getUpgradeHomeRamCost())
+    );
   } catch (e) {
     ns.tprint(e);
   }

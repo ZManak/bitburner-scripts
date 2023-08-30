@@ -1,6 +1,6 @@
 import { NS } from "@ns";
 
-export async function main(ns: NS): Promise<void> {
+export function main(ns: NS): void {
   try {
     ns.singularity.purchaseTor();
     ns.printf("Purchased TOR");

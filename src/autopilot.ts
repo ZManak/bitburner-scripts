@@ -4,7 +4,7 @@
 
 /* eslint-disable no-constant-condition */
 import { NS } from "@ns";
-import { value } from "stocks/portfolioValue";
+//import { value } from "stocks/portfolioValue";
 
 export async function main(ns: NS): Promise<void> {
   const exes = [
@@ -55,7 +55,7 @@ export async function main(ns: NS): Promise<void> {
 
   while (true) {
     //ns.clearLog();
-    const netWorh = ns.getServerMoneyAvailable("home") + value(ns);
+    //const netWorh = ns.getServerMoneyAvailable("home") + value(ns);
     const player = ns.getPlayer();
     const factionOffers = ns.singularity.checkFactionInvitations();
 
@@ -154,7 +154,7 @@ export async function main(ns: NS): Promise<void> {
       !ns.singularity.getOwnedAugmentations(true).includes("The Red Pill")
     ) {
       ns.singularity.purchaseAugmentation("Daedalus", "The Red Pill");
-      //ns.exec("/singularity/installAugs.js", "home");
+      //ns.run("/singularity/installAugs.js");
     }
 
     //Buy servers when possible
@@ -175,50 +175,11 @@ export async function main(ns: NS): Promise<void> {
       upgradeServers(ns, ns.getServer(ns.getPurchasedServers()[14]).maxRam * 2);
     }
 
-    /*if (
-      ns.formulas.work.crimeSuccessChance(player, "Larceny") < 0.75 &&
-      !ns.singularity.isBusy()
-    ) {
-      ns.singularity.commitCrime("Shoplift", false);
-    } else if (!ns.singularity.isBusy()) {
-      ns.singularity.commitCrime("Larceny", false);
-    } */
-
     //Install backdoors on canon servers
     await installBackdoor(canonServers);
-    /* for (let i = 0; i < canonServers.length; i++) {
-      const server = ns.getServer(canonServers[i]);
-      if (
-        ns.hasRootAccess(canonServers[i]) &&
-        server.backdoorInstalled === false
-      ) {
-        ns.printf("Installing backdoor on " + canonServers[i]);
-        ns.run("findServer.js", 1, canonServers[i]);
-        await ns.sleep(5000);
-        await ns.singularity.installBackdoor();
-        await ns.sleep(5000);
-        ns.printf("Backdoor on " + canonServers[i]);
-        ns.singularity.connect("home");
-      }
-    } */
 
     //Backdoor useful servers
     await installBackdoor(serverList);
-    /* for (let i = 0; i < serverList.length; i++) {
-      const server = ns.getServer(serverList[i]);
-      if (
-        ns.hasRootAccess(serverList[i]) &&
-        server.backdoorInstalled === false
-      ) {
-        ns.printf("Installing backdoor on " + serverList[i]);
-        ns.run("findServer.js", 1, serverList[i]);
-        await ns.sleep(5000);
-        await ns.singularity.installBackdoor();
-        await ns.sleep(5000);
-        ns.printf("Backdoor on " + serverList[i]);
-        ns.singularity.connect("home");
-      }
-    } */
 
     //Get into Stock Market
     if (!ns.stock.has4SDataTIXAPI() && player.money > 35e9) {
@@ -280,7 +241,7 @@ export async function main(ns: NS): Promise<void> {
       if (money > serverCost && servers.length < maxServers) {
         try {
           const server = ns.purchaseServer("Servo-", ram);
-          ns.print("Purchased server " + server + " with " + ram + "GB of RAM");
+          ns.print("Purchased server " + server + " with " + ns.formatRam(ram));
         } catch (e) {
           ns.print("Failed to purchase server");
         }
@@ -298,7 +259,7 @@ export async function main(ns: NS): Promise<void> {
       for (const server of servers) {
         const success = ns.upgradePurchasedServer(server, ram);
         if (success) {
-          ns.print("Upgraded server " + server + " to " + ram + " of RAM");
+          ns.print("Upgraded server " + server + " to " + ns.formatRam(ram));
           upgraded = upgraded + 1;
         }
       }

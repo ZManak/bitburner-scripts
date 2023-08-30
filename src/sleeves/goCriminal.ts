@@ -1,9 +1,10 @@
 /* eslint-disable no-constant-condition */
 import { NS } from "@ns";
 
-export async function main(ns: NS): Promise<void> {
+export function main(ns: NS): void {
+  //Hardcoded sleeves
   const crimes = ns.enums.CrimeType;
-  const sleeves = ns.sleeve.getNumSleeves();
+  const sleeves = 8;
 
   for (let i = 0; i < sleeves; i++) {
     const clone = ns.sleeve.getSleeve(i);

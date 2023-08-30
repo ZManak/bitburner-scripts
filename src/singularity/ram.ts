@@ -1,10 +1,6 @@
 import { NS } from "@ns";
+import { upgradeRam } from "/utils/helpers";
 
-export async function main(ns: NS): Promise<void> {
-  ns.singularity.upgradeHomeRam()
-    ? ns.tprint("Upgraded RAM")
-    : ns.tprint(
-        "Failed to upgrade RAM. Cost: " +
-          ns.formatNumber(ns.singularity.getUpgradeHomeRamCost())
-      );
+export function main(ns: NS): void {
+  upgradeRam(ns);
 }

@@ -1,19 +1,14 @@
 import { NS } from "@ns";
 import { colors } from "utils/palette.js";
-///
-//Sleeves number is hardcoded
-//Track the status of each sleeve
-//Shows INT
-//Shows stored cycles
-//Shows current task
 
 export async function main(ns: NS): Promise<void> {
+  //8sleeves
   ns.setTitle("Sleeves Status");
   // eslint-disable-next-line no-constant-condition
   while (true) {
     ns.disableLog("ALL");
     ns.clearLog();
-    const numSleeves = 7;
+    const numSleeves = 8;
     for (let i = 0; i < numSleeves; i++) {
       const clone = ns.sleeve.getSleeve(i);
       const cloneTask = ns.sleeve.getTask(i);
@@ -37,7 +32,8 @@ export async function main(ns: NS): Promise<void> {
         ns.formulas.skills.calculateExp(clone.skills.intelligence + 1) -
           clone.exp.intelligence,
         ns.formatPercent(
-          clone.exp.intelligence /
+          (ns.formulas.skills.calculateExp(clone.skills.intelligence + 1) -
+            clone.exp.intelligence) /
             ns.formulas.skills.calculateExp(clone.skills.intelligence + 1)
         )
       );
@@ -64,7 +60,3 @@ export async function main(ns: NS): Promise<void> {
     await ns.sleep(0);
   }
 }
-//  - Print out the current HP of each sleeve.This slee
-//  - Print out the current task of each sleeve.
-//  - If a sleeve's HP is below 5, set it to idle and display a toast message.
-//  - Call this function from the main function.
