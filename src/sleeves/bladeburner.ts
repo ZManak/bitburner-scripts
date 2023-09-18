@@ -1,36 +1,27 @@
-import { NS, SleeveTask, SleeveBladeburnerTask } from "@ns";
+import { NS } from "@ns";
 
-export async function main(
-  ns: NS,
-  task: SleeveTask,
-  bladeTask: SleeveBladeburnerTask
-): Promise<void> {
+export async function main(ns: NS): Promise<void> {
   // eslint-disable-next-line no-constant-condition
   while (true) {
     ns.disableLog("ALL");
     ns.clearLog();
-    const numSleeves = 6;
+    const numSleeves = 8;
     for (let i = 0; i < numSleeves; i++) {
       const clone = ns.sleeve.getSleeve(i);
-      const cloneTask = ns.sleeve.getTask(i);
+      const task = ns.sleeve.getTask(i);
       ns.printf("Sleeve %d:", i);
       ns.printf("HP: %d / %d", clone.hp.current, clone.hp.max);
-      if (task.type === "BLADEBURNER") {
+      if (task?.type === "BLADEBURNER") {
         ns.print(
           "Assignated " +
             task.actionName.toUpperCase() +
             " - " +
             task.actionType
         );
-      } else if (task?.type === "CRIME") {
-        ns.print("Commiting " + task.crimeType.toUpperCase());
       } else {
         ns.print(task?.type || "Healing");
       }
-      if (
-        clone.hp.current < 5 &&
-        bladeTask?.actionName !== "Hyperbolic Regeneration Chamber"
-      ) {
+      if (clone.hp.current < 5 && task?.type !== "RECOVERY") {
         ns.run("sleeves/heal.js");
         ns.toast(`Sleeve ${i} HP critical`, "error", 5000);
       }
