@@ -1,6 +1,7 @@
 import { NS } from "@ns";
 
 export async function main(ns: NS): Promise<void> {
+  ns.disableLog("ALL");
   // eslint-disable-next-line no-constant-condition
   while (true) {
     ns.clearLog();
@@ -15,6 +16,7 @@ export async function main(ns: NS): Promise<void> {
     const crew = ns.gang.getMemberNames();
     const gangInfo = ns.gang.getGangInformation();
     const canRecruit = ns.gang.canRecruitMember();
+    const territory = gangInfo.territory;
     //Recruit members until gang is full
     if (canRecruit) {
       const id = crypto.randomUUID();
@@ -23,7 +25,7 @@ export async function main(ns: NS): Promise<void> {
     }
 
     ns.printf("Gang size: " + crew.length);
-    ns.printf("Gang power: " + gangInfo.power);
+    ns.printf("Gang power: " + ns.formatNumber(gangInfo.power));
 
     for (const member of crew) {
       const memberInfo = ns.gang.getMemberInformation(member);
@@ -35,7 +37,7 @@ export async function main(ns: NS): Promise<void> {
         ns.gang.setMemberTask(member, "Terrorism");
       }
       //Augmentate trained members
-      if (memberInfo.agi_asc_mult > 7) {
+      if (memberInfo.agi_asc_mult > 6.7) {
         installAugs(member, ns.getServerMoneyAvailable("home"));
       }
     }
@@ -48,7 +50,26 @@ export async function main(ns: NS): Promise<void> {
       ? ns.gang.setMemberTask(terrorist[0], "Human Trafficking")
       : null;
 
+    winRate(territory);
+
     await ns.sleep(1000);
+  }
+
+  function winRate(territory: number) {
+    const rivals = ns.gang.getOtherGangInformation();
+    const names: Array<string> = Object.keys(rivals);
+    const winChances = [];
+    let totalChance = 0;
+
+    for (let i = 0; i < names.length; i++) {
+      winChances.push(ns.gang.getChanceToWinClash(names[i]));
+    }
+    for (const chance of winChances) {
+      totalChance = totalChance + chance;
+    }
+    const chanceMean = totalChance / names.length;
+    ns.print(ns.formatPercent(territory));
+    ns.print("Average " + ns.formatPercent(chanceMean) + "% clash win");
   }
 
   function installAugs(member: string, funds: number) {
@@ -69,7 +90,7 @@ export async function main(ns: NS): Promise<void> {
         !ns.gang.getMemberInformation(member).augmentations.includes(aug)
       ) {
         ns.gang.purchaseEquipment(member, aug)
-          ? ns.print(`Succesfully installed ${aug} in ${member}`)
+          ? ns.tprint(`Succesfully installed ${aug} in ${member}`)
           : null;
       }
     }

@@ -1,3 +1,4 @@
+//edited - excluded sleeves with shock
 /* eslint-disable no-constant-condition */
 import { NS } from "@ns";
 
@@ -16,13 +17,15 @@ export async function main(ns: NS): Promise<void> {
   if (!shouldProceed) return;
 
   for (let i = 0; i < sleeves; i++) {
-    const augs = ns.sleeve.getSleevePurchasableAugs(i);
-    for (const aug of augs) {
-      const installed = ns.sleeve.purchaseSleeveAug(i, aug.name);
-      const message = installed
-        ? `Installed ${aug.name} on sleeve ${i}`
-        : `Failed to install ${aug.name} on sleeve ${i}`;
-      ns.tprint(message);
+    if (ns.sleeve.getSleeve(i).shock === 0) {
+      const augs = ns.sleeve.getSleevePurchasableAugs(i);
+      for (const aug of augs) {
+        const installed = ns.sleeve.purchaseSleeveAug(i, aug.name);
+        const message = installed
+          ? `Installed ${aug.name} on sleeve ${i}`
+          : `Failed to install ${aug.name} on sleeve ${i}`;
+        ns.tprint(message);
+      }
     }
     ns.tprint("___________________________________________________________");
   }

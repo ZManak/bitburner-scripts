@@ -21,13 +21,17 @@ export async function main(ns: NS): Promise<void> {
       } else {
         ns.print(task?.type || "Healing");
       }
-      if (clone.hp.current < 5 && task?.type !== "RECOVERY") {
-        ns.run("sleeves/heal.js");
+      if (
+        clone.hp.current < 5 &&
+        task?.type === "BLADEBURNER" &&
+        task.actionName !== "Hyperbolic Regeneration Chamber"
+      ) {
+        ns.exec("sleeves/heal.js", "home", {}, i); //ns.sleeve.setToShockRecovery(i);
         ns.toast(`Sleeve ${i} HP critical`, "error", 5000);
       }
       ns.print("_______________________________");
     }
-    await ns.sleep(0);
+    await ns.sleep(1000); //1s
   }
 }
 //  - Print out the current HP of each sleeve.This slee

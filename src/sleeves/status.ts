@@ -1,4 +1,4 @@
-import { NS } from "@ns";
+import { NS, SleevePerson } from "@ns";
 import { colors } from "utils/palette.js";
 
 export async function main(ns: NS): Promise<void> {
@@ -38,6 +38,11 @@ export async function main(ns: NS): Promise<void> {
         )
       );
       ns.printf("Cycles: %d", clone.storedCycles);
+      ns.printf(
+        "Shock: %d / ~ %d minutes remaining",
+        clone.shock,
+        timeUntilNoShock(clone, clone.storedCycles)
+      );
       if (cloneTask?.type === "CRIME") {
         ns.printf(
           "Task: %s %s",
@@ -58,5 +63,18 @@ export async function main(ns: NS): Promise<void> {
       ns.print("_______________________________");
     }
     await ns.sleep(0);
+  }
+  function timeUntilNoShock(clone: SleevePerson, cycles: number): number {
+    clone.shock = Math.max(
+      0,
+      clone.shock -
+        0.0002 * Math.max(1, (clone.skills.intelligence / 500) * cycles)
+    );
+    clone.shock = Math.max(
+      0,
+      clone.shock -
+        0.0002 * Math.max(1, (clone.skills.intelligence / 500) * cycles)
+    );
+    return clone.shock;
   }
 }
