@@ -1,7 +1,34 @@
-/* eslint-disable no-constant-condition */
-import { NS } from "@ns";
+import { FactionName, NS } from "@ns";
 
 export async function main(ns: NS): Promise<void> {
+  // Define helper functions once
+  function checkIfOwnedAugs(ns: NS, faction: FactionName): boolean {
+    const ownedAugs = ns.singularity.getOwnedAugmentations(true);
+    const factionAugs = ns.singularity.getAugmentationsFromFaction(faction);
+    ns.print(factionAugs);
+    ns.print(ownedAugs);
+    let checked = 0;
+    for (const aug of factionAugs) {
+      if (ownedAugs.includes(aug)) {
+        checked = checked + 1;
+      }
+    }
+    ns.print(checked);
+    return factionAugs.length !== checked;
+  }
+
+  async function createProgram(ns: NS, exe: string): Promise<void> {
+    if (!ns.fileExists(exe, "home") && !ns.singularity.isBusy()) {
+      ns.singularity.createProgram(exe);
+      while (!ns.fileExists(exe, "home")) {
+        await ns.sleep(1000);
+      }
+      ns.print("Created " + exe);
+      ns.toast("Created " + exe);
+    }
+  }
+
+  // Main logic
   const exes = [
     "BruteSSH.exe",
     "FTPCrack.exe",
@@ -42,25 +69,22 @@ export async function main(ns: NS): Promise<void> {
   ns.disableLog("ALL");
   ns.print("Automation started");
 
+  // eslint-disable-next-line no-constant-condition
   while (true) {
     const player = ns.getPlayer();
     const factionOffers = ns.singularity.checkFactionInvitations();
 
     if (ns.getHackingLevel() < 25 && !ns.singularity.isBusy()) {
-      ns.singularity.universityCourse(
-        "rothman university",
-        "Computer Sciences"
-      );
-      ns.printf("Taking computer classess");
+      ns.singularity.universityCourse("Rothman University", "Computer Science");
+      ns.printf("Taking computer classes");
       while (ns.getHackingLevel() < 25) {
         await ns.sleep(1000);
-        ns.getHackingLevel();
       }
       ns.singularity.stopAction(); // Wait for the class to finish
     }
 
-    //Join relevant factions and work for them
-    for (const faction of factionOffers) {
+    // Join relevant factions and work for them
+    for (const faction of factionOffers as Array<FactionName>) {
       if (
         canonFactions.includes(faction) &&
         !player.factions.includes(faction)
@@ -71,9 +95,9 @@ export async function main(ns: NS): Promise<void> {
       }
     }
 
-    //Work for factions
+    // Work for factions
     if (!ns.singularity.isBusy()) {
-      for (const faction of player.factions) {
+      for (const faction of player.factions as Array<FactionName>) {
         if (canonFactions.includes(faction) && checkIfOwnedAugs(ns, faction)) {
           ns.singularity.workForFaction(faction, "hacking", false);
           ns.printf("Working for " + faction);
@@ -82,7 +106,7 @@ export async function main(ns: NS): Promise<void> {
       }
     }
 
-    //Buy the Red Pill
+    // Buy the Red Pill
     if (
       ns.singularity.getFactionRep("Daedalus") > 2.5e6 &&
       !ns.singularity.getOwnedAugmentations(true).includes("The Red Pill")
@@ -91,8 +115,7 @@ export async function main(ns: NS): Promise<void> {
       ns.exec("/singularity/installAugs.js", "home");
     }
 
-    //Sync works
-
+    // Sync works
     if (player.money > 300000 && !ns.hasTorRouter()) {
       ns.singularity.purchaseTor();
       ns.printf("Purchased TOR");
@@ -125,72 +148,31 @@ export async function main(ns: NS): Promise<void> {
       ns.singularity.purchaseProgram("SQLInject.exe");
       ns.printf("Purchased SQLInject");
     }
-    /* if (
-      ns.formulas.work.crimeSuccessChance(player, "Larceny") < 0.75 &&
-      !ns.singularity.isBusy()
-    ) {
-      ns.singularity.commitCrime("Shoplift", false);
-    } else if (!ns.singularity.isBusy()) {
-      ns.singularity.commitCrime("Larceny", false);
-    } */
 
-    for (let i = 0; i < canonServers.length; i++) {
-      const server = ns.getServer(canonServers[i]);
-      if (
-        ns.hasRootAccess(canonServers[i]) &&
-        server.backdoorInstalled !== true
-      ) {
-        ns.run("findServer.js", 1, canonServers[i]);
-        ns.printf("Installing backdoor on " + canonServers[i]);
+    for (const serverName of canonServers) {
+      const server = ns.getServer(serverName);
+      if (ns.hasRootAccess(serverName) && !server.backdoorInstalled) {
+        ns.run("findServer.js", 1, serverName);
+        ns.printf("Installing backdoor on " + serverName);
         await ns.singularity.installBackdoor();
-        ns.printf("Backdoor on " + canonServers[i]);
-        ns.toast("Backdoor on " + canonServers[i]);
+        ns.printf("Backdoor on " + serverName);
+        ns.toast("Backdoor on " + serverName);
         ns.singularity.connect("home");
       }
     }
 
-    if (!ns.stock.has4SDataTIXAPI() && player.money > 35e9) {
+    if (!ns.stock.has4SDataTixApi() && player.money > 35e9) {
       ns.stock.purchaseWseAccount();
       ns.stock.purchase4SMarketData();
       ns.stock.purchaseTixApi();
       ns.stock.purchase4SMarketDataTixApi();
     }
 
-    if (ns.stock.has4SDataTIXAPI() && !ns.isRunning("4s.js", "home")) {
+    if (ns.stock.has4SDataTixApi() && !ns.isRunning("4s.js", "home")) {
       ns.exec("4s.js", "home");
     }
 
-    await ns.sleep(0);
-  }
-
-  //Checks if owned all augs from faction
-  function checkIfOwnedAugs(ns: NS, faction: string): boolean {
-    const ownedAugs = ns.singularity.getOwnedAugmentations(true);
-    const factionAugs = ns.singularity.getAugmentationsFromFaction(faction);
-    ns.print(factionAugs);
-    ns.print(ownedAugs);
-    let checked = 0;
-    for (const aug of factionAugs) {
-      if (ownedAugs.includes(aug)) {
-        checked = checked + 1;
-      }
-    }
-    ns.print(checked);
-    if (factionAugs.length === checked) {
-      return false;
-    } else {
-      return true;
-    }
-  }
-
-  async function createProgram(ns: NS, exe: string): Promise<void> {
-    if (!ns.fileExists(exe, "home") && !ns.singularity.isBusy()) {
-      ns.singularity.createProgram(exe);
-      while (!ns.fileExists(exe, "home")) {
-        await ns.sleep(1000);
-      }
-      ns.print("Created " + exe);
-      ns.toast("Created " + exe);
-    }
+    await ns.sleep(1000);
   }
 }
+// This script automates the process of joining factions, working for them, and managing resources in Bitburner.
